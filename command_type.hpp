@@ -1,6 +1,8 @@
 #pragma once
 
-enum class CommandType
+#include <cstdint>
+
+enum class CommandType : uint32_t
 {
-    
+    COMPLEX_COMMAND
 };

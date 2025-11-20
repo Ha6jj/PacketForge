@@ -5,7 +5,9 @@
 int main()
 {
     CommandFactory factory;
-    REGISTER_COMMAND(factory, CommandType::COMPLEX_COMMAND, ComplexCommandArgs);
+    factory.registerCommand<CommandType, ComplexCommandArgs>(CommandType::COMPLEX_COMMAND, {'r', 's'});
+
+    // REGISTER_COMMAND(factory, CommandType::COMPLEX_COMMAND, ComplexCommandArgs, {0x25, 0x33});
 
     Position pos = {1, 2};
     SomeNote note = {101, "I am note!"};

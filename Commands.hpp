@@ -1,9 +1,5 @@
 #include "Serializer.hpp"
 
-enum class CommandType : uint8_t
-{
-    COMPLEX_COMMAND
-};
 
 struct Position
 {

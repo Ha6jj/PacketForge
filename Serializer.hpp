@@ -1,5 +1,7 @@
-#ifndef SERIALIZER_HEADER_GUARD
-#define SERIALIZER_HEADER_GUARD
+#pragma once
+
+#include "command_type.hpp"
+#include "header_repository/header_repository.hpp"
 
 #include <cstdint>
 #include <memory>
@@ -69,13 +71,13 @@ class Packet
 {
 public:
     template <typename Command>
-    Packet(Command cmd, std::unique_ptr<ISerializer> serializer)
-        : command_(static_cast<uint8_t>(cmd)), serializer_(std::move(serializer)) {}
+    Packet(Command cmd, std::unique_ptr<ISerializer> serializer, const HeaderRepository& header_repo)
+        : header_(header_repo.getHeader(cmd)), serializer_(std::move(serializer)) {}
 
     std::vector<uint8_t> build() const
     {
         std::vector<uint8_t> packet;
-        packet.push_back(command_);
+        packet.insert(packet.end(), header_.begin(), header_.end());
         if (serializer_)
         {
             serializer_->serialize(packet);
@@ -84,11 +86,9 @@ public:
     }
 
 private:
-    uint8_t command_;
+    std::vector<uint8_t> header_;
     std::unique_ptr<ISerializer> serializer_;
 };
-
-enum class CommandType : uint8_t;
 
 class CommandFactory
 {
@@ -96,41 +96,49 @@ public:
     CommandFactory() = default;
 
     template <typename Command, typename ArgStruct>
-    void registerCommand(Command cmd)
+    void registerCommand(Command cmd, const std::vector<uint8_t>& header)
     {
-        uint8_t code = static_cast<uint8_t>(cmd);
-        deserializers_[code] = []()
+        headers.addHeader(cmd, header);
+        
+        deserializers_[static_cast<uint32_t>(cmd)] = []()
         {
             return std::make_unique<CommandDeserializer<ArgStruct>>();
         };
     }
 
     template <typename Command, typename ArgStruct>
-    Packet create(Command cmd, ArgStruct&& args)
+    Packet create(Command cmd, ArgStruct&& args) const
     {
-        return Packet(cmd, std::make_unique<CommandSerializer<ArgStruct>>(std::forward<ArgStruct>(args)));
+        return Packet(
+            cmd,
+            std::make_unique<CommandSerializer<ArgStruct>>(std::forward<ArgStruct>(args)),
+            headers);
     }
 
-    std::pair<CommandType, std::unique_ptr<IDeserializer>> deserializePacket(const std::vector<uint8_t>& packet)
+    std::pair<CommandType, std::unique_ptr<IDeserializer>> deserializePacket(const std::vector<uint8_t>& packet) const
     {
         if (packet.empty())
         {
             throw std::invalid_argument("Empty packet");
         }
-        uint8_t commandCode = packet[0];
-        auto it = deserializers_.find(commandCode);
+
+        CommandType command = headers.getCommand(packet);
+
+        auto it = deserializers_.find(static_cast<uint32_t>(command));
         if (it == deserializers_.end())
         {
-            throw std::invalid_argument("Unknown command code: " + std::to_string(commandCode));
+            throw std::invalid_argument("No deserializer registered for command");
         }
+
         auto deserializer = it->second();
-        size_t offset = 1;
+        size_t offset = headers.getHeader(command).size();
         deserializer->deserialize(packet, offset);
-        return {static_cast<CommandType>(commandCode), std::move(deserializer)};
+        return {command, std::move(deserializer)};
     }
 
 private:
-    std::unordered_map<uint8_t, std::function<std::unique_ptr<IDeserializer>()>> deserializers_;
+    HeaderRepository headers;
+    std::unordered_map<uint32_t, std::function<std::unique_ptr<IDeserializer>()> > deserializers_;
 };
 
 template <typename T>
@@ -148,8 +156,8 @@ void deserialize_members(struct_name& value, const std::vector<uint8_t>& packet,
     (Deserializer<base_type<decltype(value.*members)>>::deserialize(value.*members, packet, offset), ...);
 }
 
-#define REGISTER_COMMAND(factory, cmd, arg_struct)                                  \
-    factory.registerCommand<CommandType, arg_struct>(cmd);
+#define REGISTER_COMMAND(factory, cmd, arg_struct, header)                          \
+    factory.registerCommand<CommandType, arg_struct>(cmd, header);
 
 #define PACKET_STRUCTURE(struct_name, ...)                                          \
 template <>                                                                         \
@@ -277,5 +285,3 @@ struct Deserializer<std::string>
         offset += length;
     }
 };
-
-#endif // SERIALIZER_HEADER_GUARD
