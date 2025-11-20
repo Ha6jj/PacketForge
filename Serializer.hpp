@@ -88,7 +88,7 @@ private:
     std::unique_ptr<ISerializer> serializer_;
 };
 
-enum class MyCommand : uint8_t;
+enum class CommandType : uint8_t;
 
 class CommandFactory
 {
@@ -111,7 +111,7 @@ public:
         return Packet(cmd, std::make_unique<CommandSerializer<ArgStruct>>(std::forward<ArgStruct>(args)));
     }
 
-    std::pair<MyCommand, std::unique_ptr<IDeserializer>> deserializePacket(const std::vector<uint8_t>& packet)
+    std::pair<CommandType, std::unique_ptr<IDeserializer>> deserializePacket(const std::vector<uint8_t>& packet)
     {
         if (packet.empty())
         {
@@ -126,7 +126,7 @@ public:
         auto deserializer = it->second();
         size_t offset = 1;
         deserializer->deserialize(packet, offset);
-        return {static_cast<MyCommand>(commandCode), std::move(deserializer)};
+        return {static_cast<CommandType>(commandCode), std::move(deserializer)};
     }
 
 private:
@@ -149,7 +149,7 @@ void deserialize_members(struct_name& value, const std::vector<uint8_t>& packet,
 }
 
 #define REGISTER_COMMAND(factory, cmd, arg_struct)                                  \
-    factory.registerCommand<MyCommand, arg_struct>(cmd);
+    factory.registerCommand<CommandType, arg_struct>(cmd);
 
 #define PACKET_STRUCTURE(struct_name, ...)                                          \
 template <>                                                                         \

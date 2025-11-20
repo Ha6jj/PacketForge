@@ -1,6 +1,6 @@
 #include "Serializer.hpp"
 
-enum class MyCommand : uint8_t
+enum class CommandType : uint8_t
 {
     COMPLEX_COMMAND
 };
