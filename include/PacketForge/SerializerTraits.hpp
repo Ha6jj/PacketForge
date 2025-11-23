@@ -1,16 +1,11 @@
 #pragma once
 
-#include "serialization_base.hpp"
+#include "core/Serializer.hpp"
 
-#include <type_traits>
 #include <vector>
 #include <cstddef>
-
-template <typename T>
-struct Serializer;
-
-template <typename T>
-struct Deserializer;
+#include <cstdint>
+#include <type_traits>
 
 template <typename T>
 using base_type = std::remove_cv_t<std::remove_reference_t<T>>;

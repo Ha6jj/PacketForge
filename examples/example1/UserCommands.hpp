@@ -1,6 +1,8 @@
-#include "command_type.hpp"
-#include "basic_type_handlers/int_handlers.hpp"
-#include "basic_type_handlers/string_handlers.hpp"
+#pragma once
+
+#include "UserCommandType.hpp"
+#include "PacketForge/handlers/IntHandlers.hpp"
+#include "PacketForge/handlers/StringHandlers.hpp"
 
 #include <stdexcept>
 

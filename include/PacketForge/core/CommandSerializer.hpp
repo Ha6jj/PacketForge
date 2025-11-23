@@ -1,6 +1,7 @@
 #pragma once
 
-#include "serializer_traits.hpp"
+#include "Serializer.hpp"
+#include "SerializationInterfaces.hpp"
 
 #include <memory>
 #include <utility>
