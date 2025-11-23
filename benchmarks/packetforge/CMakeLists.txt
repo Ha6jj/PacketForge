@@ -3,5 +3,4 @@ target_include_directories(PacketForge INTERFACE
     ${CMAKE_SOURCE_DIR}/include
 )
 
-add_subdirectory(example1)
-add_subdirectory(example2)
+# !!! Not working - Just plug

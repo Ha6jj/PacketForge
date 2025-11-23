@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+message BenchmarkPayload {
+  repeated double values = 1;
+  map<string, string> metadata = 2;
+  bool flag = 3;
+  int64 timestamp = 4;
+  bytes blob = 5;
+}

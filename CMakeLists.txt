@@ -5,9 +5,14 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_library(PacketForge INTERFACE)
-target_include_directories(PacketForge INTERFACE
-    ${CMAKE_SOURCE_DIR}/include
-)
+option(BUILD_BENCHMARKS "Build benchmark programs" OFF)
 
-add_subdirectory(examples)
+if(BUILD_BENCHMARKS)
+    add_subdirectory(benchmarks)
+endif()
+
+option(BUILD_EXAMPLES "Build examples" OFF)
+
+if(BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
