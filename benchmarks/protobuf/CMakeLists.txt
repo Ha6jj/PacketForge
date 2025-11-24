@@ -38,6 +38,7 @@ target_include_directories(protobuf_benchmark PRIVATE
 )
 
 target_link_libraries(protobuf_benchmark PRIVATE
+    BenchmarkUtils
     benchmark::benchmark
     ${PROTOBUF_LIBRARIES}
 )
