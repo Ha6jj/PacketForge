@@ -9,18 +9,7 @@ public:
     
     std::string Serialize(const BenchmarkData& data) override {
         BenchmarkPayload payload;
-        payload.mutable_values()->Reserve(data.values.size());
-        for (double value : data.values) {
-            payload.add_values(value);
-        }
-        
-        for (const auto& kv : data.metadata) {
-            (*payload.mutable_metadata())[kv.first] = kv.second;
-        }
-        
-        payload.set_flag(data.flag);
-        payload.set_timestamp(data.timestamp);
-        payload.set_blob(data.blob);
+        FillPayload(data, payload);
         
         std::string output;
         payload.SerializeToString(&output);
@@ -50,9 +39,25 @@ public:
     
     size_t GetSerializedSize(const BenchmarkData& data) override {
         BenchmarkPayload payload;
-        // Fill payload as in Serialize()
-        // ... (same population logic)
+        FillPayload(data, payload);
         return payload.ByteSizeLong();
+    }
+
+private:
+    void FillPayload(const BenchmarkData& data, BenchmarkPayload& payload) {
+        payload.mutable_values()->Reserve(data.values.size());
+        for (double value : data.values) {
+            payload.add_values(value);
+        }
+        
+        auto* proto_metadata = payload.mutable_metadata();
+        for (const auto& kv : data.metadata) {
+            (*proto_metadata)[kv.first] = kv.second;
+        }
+        
+        payload.set_flag(data.flag);
+        payload.set_timestamp(data.timestamp);
+        payload.set_blob(data.blob);
     }
 };
 

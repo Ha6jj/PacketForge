@@ -1,9 +1,11 @@
 #pragma once
 
 #include <benchmark/benchmark.h>
-
 #include <fstream>
 #include <stdexcept>
+#include <vector>
+#include <string>
+#include <algorithm>
 
 class CsvReporter : public benchmark::BenchmarkReporter {
 public:
@@ -12,30 +14,16 @@ public:
             throw std::runtime_error("Failed to open CSV file: " + filename);
         }
         file_.precision(6);
-        file_ << "serializer,operation,payload_values,blob_size,"
-              << "avg_time_us,iterations,cpu_time_us,real_time_us,"
-              << "payload_size_bytes\n";
+        file_ << "serializer,operation,"
+              << "iterations,avg_real_time_us,avg_cpu_time_us,"
+              << "total_real_time_s,payload_size_bytes\n";
     }
 
     bool ReportContext(const Context& context) override { return true; }
     
     void ReportRuns(const std::vector<Run>& reports) override {
         for (const auto& run : reports) {
-            // Extract parameters from benchmark name
-            auto name_parts = SplitName(run.benchmark_name());
-            std::string serializer = name_parts[0];
-            std::string operation = name_parts[1];
-            auto args = ExtractArgs(run.benchmark_name());
-            
-            file_ << serializer << ","
-                  << operation << ","
-                  << args[0] << ","  // num_values
-                  << args[1] << ","  // blob_size
-                  << (run.real_accumulated_time / run.iterations) << ","
-                  << run.iterations << ","
-                  << (run.cpu_accumulated_time / run.iterations) << ","
-                  << (run.real_accumulated_time / run.iterations) << ","
-                  << run.counters.at("payload_size").value << "\n";
+            ProcessRun(run);
         }
         file_.flush();
     }
@@ -45,23 +33,55 @@ public:
     }
 
 private:
-    std::vector<std::string> SplitName(const std::string& name) {
-        size_t pos = name.find('_');
-        if (pos == std::string::npos) return {name, ""};
-        return {name.substr(0, pos), name.substr(pos + 1)};
+    void ProcessRun(const Run& run) {
+        std::string serializer, operation;
+        ParseBenchmarkName(run.benchmark_name(), serializer, operation);
+
+        double payload_size = 0.0;
+        auto counter_it = run.counters.find("payload_size");
+        if (counter_it != run.counters.end()) {
+            payload_size = counter_it->second.value;
+        }
+
+        double avg_real_time_us = run.GetAdjustedRealTime() * 1e6;
+        double avg_cpu_time_us  = run.GetAdjustedCPUTime() * 1e6;
+
+        file_ << serializer << "," 
+              << operation << ","
+              << run.iterations << ","
+              << avg_real_time_us << ","
+              << avg_cpu_time_us << ","
+              << run.real_accumulated_time << ","
+              << payload_size << "\n";
     }
 
-    std::vector<size_t> ExtractArgs(const std::string& name) {
-        std::vector<size_t> args;
-        size_t start = name.find("/");
-        while (start != std::string::npos) {
-            size_t end = name.find("/", start + 1);
-            std::string arg_str = name.substr(start + 1, 
-                end == std::string::npos ? std::string::npos : end - start - 1);
-            args.push_back(std::stoul(arg_str));
-            start = end;
+    void ParseBenchmarkName(const std::string& name, 
+                           std::string& serializer, 
+                           std::string& operation) {
+        std::string clean_name = name;
+        size_t time_pos = clean_name.find("/real_time");
+        if (time_pos != std::string::npos) {
+            clean_name.erase(time_pos);
         }
-        return args;
+        
+        time_pos = clean_name.find("/cpu_time");
+        if (time_pos != std::string::npos) {
+            clean_name.erase(time_pos);
+        }
+
+        size_t args_pos = clean_name.find("/");
+        if (args_pos != std::string::npos) {
+            clean_name.erase(args_pos);
+        }
+
+        size_t underscore_pos = clean_name.find_last_of('_');
+        if (underscore_pos == std::string::npos) {
+            serializer = clean_name;
+            operation = "unknown";
+        } else {
+            serializer = clean_name.substr(0, underscore_pos);
+            operation = clean_name.substr(underscore_pos + 1);
+        }
     }
 
     std::ofstream file_;
