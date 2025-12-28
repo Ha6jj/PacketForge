@@ -6,6 +6,8 @@
 #include <optional>
 #include <unordered_map>
 
+namespace packet_forge {
+
 struct HeaderRepositoryNode
 {
     std::optional<CommandType> command;
@@ -19,3 +21,5 @@ struct HeaderRepositoryNode
         return command.has_value();
     }
 };
+
+} // namespace packet_forge

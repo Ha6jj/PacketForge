@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include "HeaderRepositoryNode.hpp"
 
+namespace packet_forge {
+
 class DeserializerHeaderRepository
 {
 public:
@@ -70,3 +72,5 @@ public:
 private:
     HeaderRepositoryNode root;
 };
+
+} // namespace packet_forge

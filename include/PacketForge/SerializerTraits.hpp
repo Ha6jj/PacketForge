@@ -7,6 +7,8 @@
 #include <cstdint>
 #include <type_traits>
 
+namespace packet_forge {
+
 template <typename T>
 using base_type = std::remove_cv_t<std::remove_reference_t<T>>;
 
@@ -20,7 +22,13 @@ void deserialize_members(Struct& value, const std::vector<uint8_t>& packet, size
     (Deserializer<base_type<decltype(value.*members)>>::deserialize(value.*members, packet, offset), ...);
 }
 
+} // namespace packet_forge
+
+
 #define PACKET_STRUCTURE(struct_name, ...)                                          \
+                                                                                    \
+namespace packet_forge {                                                            \
+                                                                                    \
 template <>                                                                         \
 struct Serializer<struct_name> {                                                    \
     static void serialize(const struct_name& value, std::vector<uint8_t>& packet) { \
@@ -35,4 +43,6 @@ struct Deserializer<struct_name> {                                              
                            size_t& offset) {                                        \
         deserialize_members(value, packet, offset, __VA_ARGS__);                    \
     }                                                                               \
-};
+};                                                                                  \
+                                                                                    \
+} // namespace packet_forge

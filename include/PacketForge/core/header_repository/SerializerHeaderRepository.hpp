@@ -6,6 +6,8 @@
 #include <unordered_map>
 #include <stdexcept>
 
+namespace packet_forge {
+
 class SerializerHeaderRepository
 {
 public:
@@ -32,3 +34,5 @@ public:
 private:
     std::unordered_map<CommandType, std::vector<uint8_t>> headers;
 };
+
+} // namespace packet_forge

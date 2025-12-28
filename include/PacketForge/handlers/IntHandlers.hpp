@@ -4,6 +4,8 @@
 
 #include <stdexcept>
 
+namespace packet_forge {
+
 // Serializer specializations
 template <>
 struct Serializer<uint8_t>
@@ -76,3 +78,5 @@ struct Deserializer<uint32_t>
         }
     }
 };
+
+} // namespace packet_forge

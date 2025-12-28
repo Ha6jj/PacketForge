@@ -5,6 +5,8 @@
 
 #include <functional>
 
+namespace packet_forge {
+
 class CommandFactory
 {
 public:
@@ -54,6 +56,8 @@ private:
     HeaderRepository headers;
     std::unordered_map<uint32_t, std::function<std::unique_ptr<IDeserializer>()>> deserializers_;
 };
+
+} // namespace packet_forge
 
 #define REGISTER_COMMAND(factory, cmd, arg_struct, header)                  \
     factory.template registerCommand<CommandType, arg_struct>(cmd, header);

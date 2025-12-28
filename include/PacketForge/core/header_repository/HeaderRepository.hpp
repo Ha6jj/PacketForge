@@ -5,6 +5,8 @@
 
 #include <vector>
 
+namespace packet_forge {
+
 class HeaderRepository
 {
 public:
@@ -38,3 +40,5 @@ private:
     DeserializerHeaderRepository deserializer_header_repository;
     SerializerHeaderRepository serializer_header_repository;
 };
+
+} // namespace packet_forge

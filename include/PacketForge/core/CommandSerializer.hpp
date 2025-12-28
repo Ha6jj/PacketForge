@@ -6,6 +6,8 @@
 #include <memory>
 #include <utility>
 
+namespace packet_forge {
+
 template <typename T>
 class CommandSerializer : public ISerializer
 {
@@ -39,3 +41,5 @@ public:
 private:
     T args_;
 };
+
+} // namespace packet_forge

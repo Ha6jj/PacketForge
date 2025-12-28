@@ -4,6 +4,8 @@
 
 #include <string>
 
+namespace packet_forge {
+
 template <>
 struct Serializer<std::string>
 {
@@ -30,3 +32,5 @@ struct Deserializer<std::string>
         offset += length;
     }
 };
+
+} // namespace packet_forge

@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <vector>
 
+namespace packet_forge {
+
 class ISerializer
 {
 public:
@@ -17,3 +19,5 @@ public:
     virtual ~IDeserializer() = default;
     virtual void deserialize(const std::vector<uint8_t>& packet, size_t& offset) = 0;
 };
+
+} // namespace packet_forge

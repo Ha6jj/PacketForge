@@ -5,8 +5,8 @@
 
 int main()
 {
-    CommandFactory factory;
-    factory.registerCommand<CommandType, ComplexCommandArgs>(CommandType::COMPLEX_COMMAND, {'r', 's'});
+    packet_forge::CommandFactory factory;
+    factory.registerCommand<packet_forge::CommandType, ComplexCommandArgs>(packet_forge::CommandType::COMPLEX_COMMAND, {'r', 's'});
 
     // REGISTER_COMMAND(factory, CommandType::COMPLEX_COMMAND, ComplexCommandArgs, {0x25, 0x33});
 
@@ -14,7 +14,7 @@ int main()
     SomeNote note = {101, "I am note!"};
     ComplexCommandArgs cmd = {Entity{pos, "entity"}, note};
 
-    Packet packet = factory.create(CommandType::COMPLEX_COMMAND, std::move(cmd));
+    packet_forge::Packet packet = factory.create(packet_forge::CommandType::COMPLEX_COMMAND, std::move(cmd));
     std::vector<uint8_t> result = packet.build();
 
     for (int i = 0; i < result.size(); ++i)
@@ -26,9 +26,9 @@ int main()
     ComplexCommandArgs restored_cmd;
     auto [command_type, deserializer] = factory.deserializePacket(result);
 
-    if (command_type == CommandType::COMPLEX_COMMAND)
+    if (command_type == packet_forge::CommandType::COMPLEX_COMMAND)
     {
-        restored_cmd = static_cast<CommandDeserializer<ComplexCommandArgs>&>(*deserializer.get()).getArgs();
+        restored_cmd = static_cast<packet_forge::CommandDeserializer<ComplexCommandArgs>&>(*deserializer.get()).getArgs();
         
         std::cout << restored_cmd.note.note << std::endl;
     }

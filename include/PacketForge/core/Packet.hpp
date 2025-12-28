@@ -6,6 +6,8 @@
 #include <vector>
 #include <memory>
 
+namespace packet_forge {
+
 class Packet
 {
 public:
@@ -27,3 +29,5 @@ private:
     std::vector<uint8_t> header_;
     std::unique_ptr<ISerializer> serializer_;
 };
+
+} // namespace packet_forge

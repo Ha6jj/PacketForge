@@ -13,7 +13,7 @@ struct Position
 };
 
 template <>
-struct Serializer<Position>
+struct packet_forge::Serializer<Position>
 {
     static void serialize(const Position& value, std::vector<uint8_t>& packet)
     {
@@ -23,7 +23,7 @@ struct Serializer<Position>
 };
 
 template <>
-struct Deserializer<Position>
+struct packet_forge::Deserializer<Position>
 {
     static void deserialize(Position& value, const std::vector<uint8_t>& packet, size_t& offset)
     {
@@ -43,7 +43,7 @@ struct SomeNote
 };
 
 template <>
-struct Serializer<SomeNote>
+struct packet_forge::Serializer<SomeNote>
 {
     static void serialize(const SomeNote& value, std::vector<uint8_t>& packet)
     {
@@ -53,7 +53,7 @@ struct Serializer<SomeNote>
 };
 
 template <>
-struct Deserializer<SomeNote>
+struct packet_forge::Deserializer<SomeNote>
 {
     static void deserialize(SomeNote& value, const std::vector<uint8_t>& packet, size_t& offset)
     {
@@ -73,7 +73,7 @@ struct Entity
 };
 
 template <>
-struct Serializer<Entity>
+struct packet_forge::Serializer<Entity>
 {
     static void serialize(const Entity& value, std::vector<uint8_t>& packet)
     {
@@ -83,7 +83,7 @@ struct Serializer<Entity>
 };
 
 template <>
-struct Deserializer<Entity>
+struct packet_forge::Deserializer<Entity>
 {
     static void deserialize(Entity& value, const std::vector<uint8_t>& packet, size_t& offset)
     {
