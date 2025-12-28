@@ -7,11 +7,13 @@
 
 namespace packet_forge {
 
+template <typename Tag>
 class CommandFactory
 {
+    using SuitType = CommandType<Tag>;
 public:
-    template <typename CommandType, typename ArgStruct>
-    void registerCommand(CommandType cmd, const std::vector<uint8_t>& header)
+    template <typename ArgStruct>
+    void registerCommand(SuitType cmd, const std::vector<uint8_t>& header)
     {
         headers.addHeader(cmd, header);
         deserializers_[static_cast<uint32_t>(cmd)] = []
@@ -20,17 +22,17 @@ public:
         };
     }
 
-    template <typename CommandType, typename ArgStruct>
-    Packet create(CommandType cmd, ArgStruct&& args) const
+    template <typename ArgStruct>
+    Packet<Tag> create(SuitType cmd, ArgStruct&& args) const
     {
-        return Packet(
+        return Packet<Tag>(
             cmd,
             std::make_unique<CommandSerializer<ArgStruct>>(std::forward<ArgStruct>(args)),
             headers
         );
     }
 
-    std::pair<CommandType, std::unique_ptr<IDeserializer>>
+    std::pair<SuitType, std::unique_ptr<IDeserializer>>
     deserializePacket(const std::vector<uint8_t>& packet) const
     {
         if (packet.empty())
@@ -38,7 +40,7 @@ public:
             throw std::invalid_argument("Empty packet");
         }
 
-        CommandType command = headers.getCommand(packet);
+        SuitType command = headers.getCommand(packet);
         auto it = deserializers_.find(static_cast<uint32_t>(command));
         if (it == deserializers_.end())
         {
@@ -53,12 +55,11 @@ public:
 
 
 private:
-    HeaderRepository headers;
+    HeaderRepository<Tag> headers;
     std::unordered_map<uint32_t, std::function<std::unique_ptr<IDeserializer>()>> deserializers_;
 };
 
 } // namespace packet_forge
 
 #define REGISTER_COMMAND(factory, cmd, arg_struct, header)                  \
-    factory.template registerCommand<CommandType, arg_struct>(cmd, header);
-
+    factory.template registerCommand<arg_struct>(cmd, header);

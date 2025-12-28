@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/header_repository/CommandType.hpp"
 #include "core/Serializer.hpp"
 
 #include <vector>
@@ -45,4 +46,20 @@ struct Deserializer<struct_name> {                                              
     }                                                                               \
 };                                                                                  \
                                                                                     \
+} // namespace packet_forge
+
+
+#define DEFINE_COMMAND_SUIT(NAME, ...)  \
+                                        \
+namespace packet_forge {                \
+                                        \
+struct NAME##_tag {};                   \
+                                        \
+template <>                             \
+struct CommandSuit<NAME##_tag> {        \
+    enum class type : uint32_t {        \
+        __VA_ARGS__                     \
+    };                                  \
+};                                      \
+                                        \
 } // namespace packet_forge

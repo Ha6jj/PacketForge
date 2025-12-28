@@ -1,8 +1,7 @@
 #pragma once
 
-#include "PacketForge/core/header_repository/CommandType.hpp"
+#include "PacketForge/SerializerTraits.hpp"
 
-enum class packet_forge::CommandType : uint32_t
-{
-    COMPLEX_COMMAND
-};
+DEFINE_COMMAND_SUIT(ComplexSuit, 
+    ComplexCommand
+)

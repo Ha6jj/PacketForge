@@ -8,13 +8,14 @@
 
 namespace packet_forge {
 
+template <typename Tag>
 class Packet
 {
+    using SuitType = CommandType<Tag>;
 public:
-    template <typename Command>
-    Packet(Command cmd, 
+    Packet(SuitType cmd, 
            std::unique_ptr<ISerializer> serializer,
-           const HeaderRepository& header_repo)
+           const HeaderRepository<Tag>& header_repo)
         : header_(header_repo.getHeader(cmd)), serializer_(std::move(serializer)) {}
 
     std::vector<uint8_t> build() const

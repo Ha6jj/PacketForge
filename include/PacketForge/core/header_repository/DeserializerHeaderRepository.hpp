@@ -6,17 +6,20 @@
 
 namespace packet_forge {
 
+template <typename Tag>
 class DeserializerHeaderRepository
 {
+    using SuitType = CommandType<Tag>;
+    using SuitNode = HeaderRepositoryNode<Tag>;
 public:
-    void addHeader(CommandType command, const std::vector<uint8_t>& header)
+    void addHeader(SuitType command, const std::vector<uint8_t>& header)
     {
         if (header.empty())
         {
             throw std::runtime_error("Empty header is not allowed");
         }
 
-        HeaderRepositoryNode* current = &root;
+        SuitNode* current = &root;
         for (uint8_t byte : header)
         {
             auto& children = current->children;
@@ -32,8 +35,8 @@ public:
             }
             else
             {
-                auto new_node = std::make_unique<HeaderRepositoryNode>();
-                HeaderRepositoryNode* new_node_ptr = new_node.get();
+                auto new_node = std::make_unique<SuitNode>();
+                SuitNode* new_node_ptr = new_node.get();
                 children[byte] = std::move(new_node);
                 current = new_node_ptr;
             }
@@ -47,9 +50,9 @@ public:
         current->command = command;
     }
 
-    CommandType getCommand(const std::vector<uint8_t>& packet) const
+    SuitType getCommand(const std::vector<uint8_t>& packet) const
     {
-        const HeaderRepositoryNode* current = &root;
+        const SuitNode* current = &root;
 
         for (uint8_t byte : packet)
         {
@@ -70,7 +73,7 @@ public:
     }
 
 private:
-    HeaderRepositoryNode root;
+    SuitNode root;
 };
 
 } // namespace packet_forge

@@ -8,12 +8,15 @@
 
 namespace packet_forge {
 
-struct HeaderRepositoryNode
+template <typename Tag>
+class HeaderRepositoryNode
 {
-    std::optional<CommandType> command;
+    using SuitType = CommandType<Tag>;
+public:
+    std::optional<SuitType> command;
     std::unordered_map<uint8_t, std::unique_ptr<HeaderRepositoryNode>> children;
 
-    explicit HeaderRepositoryNode(std::optional<CommandType> cmd = std::nullopt) noexcept
+    explicit HeaderRepositoryNode(std::optional<SuitType> cmd = std::nullopt) noexcept
         : command(std::move(cmd)) {}
 
     bool isTerminal() const noexcept

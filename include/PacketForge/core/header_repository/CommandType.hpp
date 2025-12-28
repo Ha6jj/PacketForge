@@ -4,6 +4,10 @@
 
 namespace packet_forge {
 
-enum class CommandType : uint32_t;
+template <typename Tag>
+struct CommandSuit;
+
+template <typename Tag>
+using CommandType = typename CommandSuit<Tag>::type;
 
 } // namespace packet_forge

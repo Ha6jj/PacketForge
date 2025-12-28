@@ -7,10 +7,12 @@
 
 namespace packet_forge {
 
+template <typename Tag>
 class HeaderRepository
 {
+    using SuitType = CommandType<Tag>;
 public:
-    void addHeader(CommandType command, const std::vector<uint8_t>& header)
+    void addHeader(SuitType command, const std::vector<uint8_t>& header)
     {
         if (header.empty())
         {
@@ -26,19 +28,19 @@ public:
         deserializer_header_repository.addHeader(command, header);
     }
 
-    std::vector<uint8_t> getHeader(CommandType command) const
+    std::vector<uint8_t> getHeader(SuitType command) const
     {
         return serializer_header_repository.getHeader(command);
     }
 
-    CommandType getCommand(const std::vector<uint8_t>& packet) const
+    SuitType getCommand(const std::vector<uint8_t>& packet) const
     {
         return deserializer_header_repository.getCommand(packet);
     }
 
 private:
-    DeserializerHeaderRepository deserializer_header_repository;
-    SerializerHeaderRepository serializer_header_repository;
+    DeserializerHeaderRepository<Tag> deserializer_header_repository;
+    SerializerHeaderRepository<Tag> serializer_header_repository;
 };
 
 } // namespace packet_forge
