@@ -3,6 +3,7 @@
 #include <vector>
 #include <stdexcept>
 #include "HeaderRepositoryNode.hpp"
+#include "VectorView.hpp"
 
 namespace packet_forge {
 
@@ -12,7 +13,7 @@ class DeserializerHeaderRepository
     using SuitType = CommandType<Tag>;
     using SuitNode = HeaderRepositoryNode<Tag>;
 public:
-    void addHeader(SuitType command, const std::vector<uint8_t>& header)
+    void addHeader(SuitType command, VectorView<const uint8_t> header)
     {
         if (header.empty())
         {
@@ -50,7 +51,7 @@ public:
         current->command = command;
     }
 
-    SuitType getCommand(const std::vector<uint8_t>& packet) const
+    SuitType getCommand(VectorView<const uint8_t> packet) const
     {
         const SuitNode* current = &root;
 

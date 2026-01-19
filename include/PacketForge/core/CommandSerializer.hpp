@@ -28,9 +28,9 @@ template <typename T>
 class CommandDeserializer : public IDeserializer
 {
 public:
-    void deserialize(const std::vector<uint8_t>& packet, size_t& offset) override
+    DeserializeResult deserialize(VectorView<const uint8_t> packet_view, size_t& offset) override
     {
-        Deserializer<T>::deserialize(args_, packet, offset);
+        return Deserializer<T>::deserialize(args_, packet_view, offset);
     }
 
     T& getArgs()

@@ -20,16 +20,16 @@ struct Serializer<std::string>
 template <>
 struct Deserializer<std::string>
 {
-    static void deserialize(std::string& value, const std::vector<uint8_t>& packet, size_t& offset)
+    static DeserializeResult deserialize(std::string& value, VectorView<const uint8_t> packet, size_t& offset)
     {
         uint32_t length;
-        Deserializer<uint32_t>::deserialize(length, packet, offset);
-        if (offset + length > packet.size())
-        {
-            throw std::out_of_range("Packet too short");
-        }
+        if (auto res = Deserializer<uint32_t>::deserialize(length, packet, offset);
+            res != DeserializeResult::DeserializeSuccess) return res;
+        if (offset + length > packet.size()) return DeserializeResult::OutOfRange;
+
         value.assign(packet.begin() + offset, packet.begin() + offset + length);
         offset += length;
+        return DeserializeResult::DeserializeSuccess;
     }
 };
 

@@ -43,39 +43,42 @@ struct Serializer<uint32_t>
 template <>
 struct Deserializer<uint8_t>
 {
-    static void deserialize(uint8_t& value, const std::vector<uint8_t>& packet, size_t& offset)
+    static DeserializeResult deserialize(uint8_t& value, VectorView<const uint8_t> packet, size_t& offset)
     {
-        if (offset >= packet.size()) throw std::out_of_range("Packet too short");
+        if (offset + 1 > packet.size()) return DeserializeResult::OutOfRange;
 
         value = packet[offset++];
+        return DeserializeResult::DeserializeSuccess;
     }
 };
 
 template <>
 struct Deserializer<uint16_t>
 {
-    static void deserialize(uint16_t& value, const std::vector<uint8_t>& packet, size_t& offset)
+    static DeserializeResult deserialize(uint16_t& value, VectorView<const uint8_t> packet, size_t& offset)
     {
-        if (offset + 2 > packet.size()) throw std::out_of_range("Packet too short");
+        if (offset + 2 > packet.size()) return DeserializeResult::OutOfRange;
 
         value = static_cast<uint16_t>(packet[offset]) 
                 | (static_cast<uint16_t>(packet[offset + 1]) << 8);
-            offset += 2;
+        offset += 2;
+        return DeserializeResult::DeserializeSuccess;
     }
 };
 
 template <>
 struct Deserializer<uint32_t>
 {
-    static void deserialize(uint32_t& value, const std::vector<uint8_t>& packet, size_t& offset)
+    static DeserializeResult deserialize(uint32_t& value, VectorView<const uint8_t> packet, size_t& offset)
     {
-        if (offset + 4 > packet.size()) throw std::out_of_range("Packet too short");
+        if (offset + 4 > packet.size()) return DeserializeResult::OutOfRange;
 
         value = 0;
         for (int i = 0; i < 4; ++i)
         {
             value |= static_cast<uint32_t>(packet[offset++]) << (i * 8);
         }
+        return DeserializeResult::DeserializeSuccess;
     }
 };
 

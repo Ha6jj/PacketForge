@@ -14,13 +14,20 @@ template <typename T>
 using base_type = std::remove_cv_t<std::remove_reference_t<T>>;
 
 template <typename Struct, typename... Members>
-void serialize_members(const Struct& value, std::vector<uint8_t>& packet, Members... members) {
+void serialize_members(const Struct& value, std::vector<uint8_t>& packet, Members... members)
+{
     (Serializer<base_type<decltype(value.*members)>>::serialize(value.*members, packet), ...);
 }
 
 template <typename Struct, typename... Members>
-void deserialize_members(Struct& value, const std::vector<uint8_t>& packet, size_t& offset, Members... members) {
-    (Deserializer<base_type<decltype(value.*members)>>::deserialize(value.*members, packet, offset), ...);
+DeserializeResult deserialize_members(Struct& value, VectorView<const uint8_t> packet, size_t& offset, Members... members)
+{
+    DeserializeResult res = DeserializeResult::DeserializeSuccess;
+
+    (void)(((res = Deserializer<base_type<decltype(value.*members)>>::deserialize(value.*members, packet, offset)) 
+             == DeserializeResult::DeserializeSuccess) && ...);
+    
+    return res;
 }
 
 } // namespace packet_forge
@@ -31,18 +38,22 @@ void deserialize_members(Struct& value, const std::vector<uint8_t>& packet, size
 namespace packet_forge {                                                            \
                                                                                     \
 template <>                                                                         \
-struct Serializer<struct_name> {                                                    \
-    static void serialize(const struct_name& value, std::vector<uint8_t>& packet) { \
+struct Serializer<struct_name>                                                      \
+{                                                                                   \
+    static void serialize(const struct_name& value, std::vector<uint8_t>& packet)   \
+    {                                                                               \
         serialize_members(value, packet, __VA_ARGS__);                              \
     }                                                                               \
 };                                                                                  \
                                                                                     \
 template <>                                                                         \
-struct Deserializer<struct_name> {                                                  \
-    static void deserialize(struct_name& value,                                     \
-                           const std::vector<uint8_t>& packet,                      \
-                           size_t& offset) {                                        \
-        deserialize_members(value, packet, offset, __VA_ARGS__);                    \
+struct Deserializer<struct_name>                                                    \
+{                                                                                   \
+    static DeserializeResult deserialize(struct_name& value,                        \
+                           VectorView<const uint8_t> packet,                        \
+                           size_t& offset)                                          \
+    {                                                                               \
+        return deserialize_members(value, packet, offset, __VA_ARGS__);             \
     }                                                                               \
 };                                                                                  \
                                                                                     \

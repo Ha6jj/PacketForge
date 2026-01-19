@@ -32,15 +32,18 @@ public:
         );
     }
 
-    std::pair<SuitType, std::unique_ptr<IDeserializer>>
-    deserializePacket(const std::vector<uint8_t>& packet) const
+    struct PacketResult
     {
-        if (packet.empty())
-        {
-            throw std::invalid_argument("Empty packet");
-        }
+        SuitType command;
+        std::unique_ptr<IDeserializer> deserializer;
+        size_t totalSize;
+    };
 
-        SuitType command = headers.getCommand(packet);
+    std::optional<PacketResult> deserializePacket(VectorView<const uint8_t> packet_view) const
+    {
+        if (packet_view.empty()) return std::nullopt;
+
+        SuitType command = headers.getCommand(packet_view);
         auto it = deserializers_.find(static_cast<uint32_t>(command));
         if (it == deserializers_.end())
         {
@@ -49,8 +52,31 @@ public:
 
         auto deserializer = it->second();
         size_t offset = headers.getHeader(command).size();
-        deserializer->deserialize(packet, offset);
-        return {command, std::move(deserializer)};
+        if (deserializer->deserialize(packet_view, offset) != DeserializeResult::DeserializeSuccess)
+        {
+            return std::nullopt;
+        }
+
+        return PacketResult{ command, std::move(deserializer), offset };
+    }
+
+    std::vector<PacketResult> deserializeStream(VectorView<const uint8_t> stream_view) const
+    {
+        std::vector<PacketResult> result;
+
+        while (!stream_view.empty())
+        {
+            auto packetOpt = deserializePacket(stream_view);
+            
+            if (!packetOpt) break;
+
+            auto& packet = *packetOpt;
+            stream_view = stream_view.subspan(packet.totalSize);
+
+            result.push_back(std::move(packet));
+        }
+
+        return result;
     }
 
 

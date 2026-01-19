@@ -12,7 +12,7 @@ class HeaderRepository
 {
     using SuitType = CommandType<Tag>;
 public:
-    void addHeader(SuitType command, const std::vector<uint8_t>& header)
+    void addHeader(SuitType command, VectorView<const uint8_t> header)
     {
         if (header.empty())
         {
@@ -28,12 +28,12 @@ public:
         deserializer_header_repository.addHeader(command, header);
     }
 
-    std::vector<uint8_t> getHeader(SuitType command) const
+    VectorView<const uint8_t> getHeader(SuitType command) const
     {
         return serializer_header_repository.getHeader(command);
     }
 
-    SuitType getCommand(const std::vector<uint8_t>& packet) const
+    SuitType getCommand(VectorView<const uint8_t> packet) const
     {
         return deserializer_header_repository.getCommand(packet);
     }

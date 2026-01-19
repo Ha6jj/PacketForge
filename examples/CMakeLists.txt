@@ -4,3 +4,4 @@ target_include_directories(PacketForge INTERFACE
 )
 
 add_subdirectory(example1)
+add_subdirectory(example2)

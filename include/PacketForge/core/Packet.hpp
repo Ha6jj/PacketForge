@@ -27,7 +27,7 @@ public:
     }
 
 private:
-    std::vector<uint8_t> header_;
+    VectorView<const uint8_t> header_;
     std::unique_ptr<ISerializer> serializer_;
 };
 

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "DeserializeResult.hpp"
+#include "header_repository/VectorView.hpp"
+
 #include <cstddef>
 #include <cstdint>
 #include <vector>
@@ -17,7 +20,7 @@ class IDeserializer
 {
 public:
     virtual ~IDeserializer() = default;
-    virtual void deserialize(const std::vector<uint8_t>& packet, size_t& offset) = 0;
+    virtual DeserializeResult deserialize(VectorView<const uint8_t> packet, size_t& offset) = 0;
 };
 
 } // namespace packet_forge

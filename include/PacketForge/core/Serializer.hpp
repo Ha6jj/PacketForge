@@ -1,5 +1,7 @@
 #pragma once
 
+#include "DeserializeResult.hpp"
+
 namespace packet_forge {
 
 template <typename T>

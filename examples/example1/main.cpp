@@ -22,11 +22,11 @@ int main()
     std::cout << std::endl;
 
     ComplexCommandArgs restored_cmd;
-    auto [command_type, deserializer] = complex_factory.deserializePacket(result);
+    auto packetResult = complex_factory.deserializePacket(result).value();
 
-    if (command_type == packet_forge::CommandType<packet_forge::ComplexSuit_tag>::ComplexCommand)
+    if (packetResult.command == packet_forge::CommandType<packet_forge::ComplexSuit_tag>::ComplexCommand)
     {
-        restored_cmd = static_cast<packet_forge::CommandDeserializer<ComplexCommandArgs>&>(*deserializer.get()).getArgs();
+        restored_cmd = static_cast<packet_forge::CommandDeserializer<ComplexCommandArgs>&>(*packetResult.deserializer.get()).getArgs();
         
         std::cout << restored_cmd.note.note << std::endl;
     }

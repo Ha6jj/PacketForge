@@ -25,14 +25,14 @@ struct packet_forge::Serializer<Position>
 template <>
 struct packet_forge::Deserializer<Position>
 {
-    static void deserialize(Position& value, const std::vector<uint8_t>& packet, size_t& offset)
+    static DeserializeResult deserialize(Position& value, VectorView<const uint8_t> packet, size_t& offset)
     {
-        if (offset >= packet.size())
-        {
-            throw std::out_of_range("Packet too short");
-        }
-        Deserializer<uint32_t>::deserialize(value.x, packet, offset);
-        Deserializer<uint32_t>::deserialize(value.y, packet, offset);
+        if (auto res = Deserializer<uint32_t>::deserialize(value.x, packet, offset);
+            res != DeserializeResult::DeserializeSuccess) return res;
+        if (auto res = Deserializer<uint32_t>::deserialize(value.y, packet, offset);
+            res != DeserializeResult::DeserializeSuccess) return res;
+        return DeserializeResult::DeserializeSuccess;
+        // return Deserializer<uint32_t>::deserialize(value.x, packet, offset);
     }
 };
 
@@ -55,14 +55,13 @@ struct packet_forge::Serializer<SomeNote>
 template <>
 struct packet_forge::Deserializer<SomeNote>
 {
-    static void deserialize(SomeNote& value, const std::vector<uint8_t>& packet, size_t& offset)
+    static DeserializeResult deserialize(SomeNote& value, VectorView<const uint8_t> packet, size_t& offset)
     {
-        if (offset >= packet.size())
-        {
-            throw std::out_of_range("Packet too short");
-        }
-        Deserializer<uint8_t>::deserialize(value.system_flags, packet, offset);
-        Deserializer<std::string>::deserialize(value.note, packet, offset);
+        if (auto res = Deserializer<uint8_t>::deserialize(value.system_flags, packet, offset);
+            res != DeserializeResult::DeserializeSuccess) return res;
+        if (auto res = Deserializer<std::string>::deserialize(value.note, packet, offset);
+            res != DeserializeResult::DeserializeSuccess) return res;
+        return DeserializeResult::DeserializeSuccess;
     }
 };
 
@@ -85,14 +84,13 @@ struct packet_forge::Serializer<Entity>
 template <>
 struct packet_forge::Deserializer<Entity>
 {
-    static void deserialize(Entity& value, const std::vector<uint8_t>& packet, size_t& offset)
+    static DeserializeResult deserialize(Entity& value, VectorView<const uint8_t> packet, size_t& offset)
     {
-        if (offset >= packet.size())
-        {
-            throw std::out_of_range("Packet too short");
-        }
-        Deserializer<Position>::deserialize(value.pos, packet, offset);
-        Deserializer<std::string>::deserialize(value.name, packet, offset);
+        if (auto res = Deserializer<Position>::deserialize(value.pos, packet, offset);
+            res != DeserializeResult::DeserializeSuccess) return res;
+        if (auto res = Deserializer<std::string>::deserialize(value.name, packet, offset);
+            res != DeserializeResult::DeserializeSuccess) return res;
+        return DeserializeResult::DeserializeSuccess;
     }
 };
 
