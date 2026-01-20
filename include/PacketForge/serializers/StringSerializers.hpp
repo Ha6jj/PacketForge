@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IntHandlers.hpp"
+#include "IntSerializers.hpp"
 
 #include <string>
 
@@ -20,16 +20,16 @@ struct Serializer<std::string>
 template <>
 struct Deserializer<std::string>
 {
-    static DeserializeResult deserialize(std::string& value, VectorView<const uint8_t> packet, size_t& offset)
+    static DeserializationResult deserialize(std::string& value, VectorView<const uint8_t> packet, size_t& offset)
     {
         uint32_t length;
         if (auto res = Deserializer<uint32_t>::deserialize(length, packet, offset);
-            res != DeserializeResult::DeserializeSuccess) return res;
-        if (offset + length > packet.size()) return DeserializeResult::OutOfRange;
+            res != DeserializationResult::Success) return res;
+        if (offset + length > packet.size()) return DeserializationResult::OutOfRange;
 
         value.assign(packet.begin() + offset, packet.begin() + offset + length);
         offset += length;
-        return DeserializeResult::DeserializeSuccess;
+        return DeserializationResult::Success;
     }
 };
 

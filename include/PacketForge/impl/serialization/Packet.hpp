@@ -1,9 +1,9 @@
 #pragma once
 
-#include "SerializationInterfaces.hpp"
-#include "header_repository/HeaderRepository.hpp"
+#include "IPacketSerializer.hpp"
+#include "../detail/CommandType.hpp"
+#include "../detail/vector_view/VectorView.hpp"
 
-#include <vector>
 #include <memory>
 
 namespace packet_forge {
@@ -14,9 +14,9 @@ class Packet
     using SuitType = CommandType<Tag>;
 public:
     Packet(SuitType cmd, 
-           std::unique_ptr<ISerializer> serializer,
-           const HeaderRepository<Tag>& header_repo)
-        : header_(header_repo.getHeader(cmd)), serializer_(std::move(serializer)) {}
+           std::unique_ptr<IPacketSerializer> serializer,
+           VectorView<const uint8_t> header)
+        : header_(header), serializer_(std::move(serializer)) {}
 
     std::vector<uint8_t> build() const
     {
@@ -28,7 +28,7 @@ public:
 
 private:
     VectorView<const uint8_t> header_;
-    std::unique_ptr<ISerializer> serializer_;
+    std::unique_ptr<IPacketSerializer> serializer_;
 };
 
 } // namespace packet_forge

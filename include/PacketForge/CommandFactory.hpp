@@ -1,7 +1,10 @@
 #pragma once
 
-#include "core/Packet.hpp"
-#include "core/CommandSerializer.hpp"
+#include "impl/serialization/Packet.hpp"
+#include "impl/serialization/PacketSerializer.hpp"
+#include "impl/deserialization/PacketDescriptor.hpp"
+#include "impl/deserialization/PacketDeserializer.hpp"
+#include "impl/header_repository/HeaderRepository.hpp"
 
 #include <functional>
 
@@ -18,7 +21,7 @@ public:
         headers.addHeader(cmd, header);
         deserializers_[static_cast<uint32_t>(cmd)] = []
         {
-            return std::make_unique<CommandDeserializer<ArgStruct>>();
+            return std::make_unique<PacketDeserializer<ArgStruct>>();
         };
     }
 
@@ -27,19 +30,12 @@ public:
     {
         return Packet<Tag>(
             cmd,
-            std::make_unique<CommandSerializer<ArgStruct>>(std::forward<ArgStruct>(args)),
-            headers
+            std::make_unique<PacketSerializer<ArgStruct>>(std::forward<ArgStruct>(args)),
+            headers.getHeader(cmd)
         );
     }
 
-    struct PacketResult
-    {
-        SuitType command;
-        std::unique_ptr<IDeserializer> deserializer;
-        size_t totalSize;
-    };
-
-    std::optional<PacketResult> deserializePacket(VectorView<const uint8_t> packet_view) const
+    std::optional<PacketDescriptor<Tag>> deserializePacket(VectorView<const uint8_t> packet_view) const
     {
         if (packet_view.empty()) return std::nullopt;
 
@@ -52,17 +48,17 @@ public:
 
         auto deserializer = it->second();
         size_t offset = headers.getHeader(command).size();
-        if (deserializer->deserialize(packet_view, offset) != DeserializeResult::DeserializeSuccess)
+        if (deserializer->deserialize(packet_view, offset) != DeserializationResult::Success)
         {
             return std::nullopt;
         }
 
-        return PacketResult{ command, std::move(deserializer), offset };
+        return PacketDescriptor<Tag>{ command, std::move(deserializer), offset };
     }
 
-    std::vector<PacketResult> deserializeStream(VectorView<const uint8_t> stream_view) const
+    std::vector<PacketDescriptor<Tag>> deserializeStream(VectorView<const uint8_t> stream_view) const
     {
-        std::vector<PacketResult> result;
+        std::vector<PacketDescriptor<Tag>> result;
 
         while (!stream_view.empty())
         {
@@ -82,7 +78,7 @@ public:
 
 private:
     HeaderRepository<Tag> headers;
-    std::unordered_map<uint32_t, std::function<std::unique_ptr<IDeserializer>()>> deserializers_;
+    std::unordered_map<uint32_t, std::function<std::unique_ptr<IPacketDeserializer>()>> deserializers_;
 };
 
 } // namespace packet_forge

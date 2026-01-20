@@ -1,11 +1,7 @@
 #pragma once
 
-#include "core/header_repository/CommandType.hpp"
-#include "core/Serializer.hpp"
+#include "../SerializerKit.hpp"
 
-#include <vector>
-#include <cstddef>
-#include <cstdint>
 #include <type_traits>
 
 namespace packet_forge {
@@ -20,12 +16,12 @@ void serialize_members(const Struct& value, std::vector<uint8_t>& packet, Member
 }
 
 template <typename Struct, typename... Members>
-DeserializeResult deserialize_members(Struct& value, VectorView<const uint8_t> packet, size_t& offset, Members... members)
+DeserializationResult deserialize_members(Struct& value, VectorView<const uint8_t> packet, size_t& offset, Members... members)
 {
-    DeserializeResult res = DeserializeResult::DeserializeSuccess;
+    DeserializationResult res = DeserializationResult::Success;
 
     (void)(((res = Deserializer<base_type<decltype(value.*members)>>::deserialize(value.*members, packet, offset)) 
-             == DeserializeResult::DeserializeSuccess) && ...);
+             == DeserializationResult::Success) && ...);
     
     return res;
 }
@@ -49,7 +45,7 @@ struct Serializer<struct_name>                                                  
 template <>                                                                         \
 struct Deserializer<struct_name>                                                    \
 {                                                                                   \
-    static DeserializeResult deserialize(struct_name& value,                        \
+    static DeserializationResult deserialize(struct_name& value,                    \
                            VectorView<const uint8_t> packet,                        \
                            size_t& offset)                                          \
     {                                                                               \
@@ -57,20 +53,4 @@ struct Deserializer<struct_name>                                                
     }                                                                               \
 };                                                                                  \
                                                                                     \
-} // namespace packet_forge
-
-
-#define DEFINE_COMMAND_SUIT(NAME, ...)  \
-                                        \
-namespace packet_forge {                \
-                                        \
-struct NAME##_tag {};                   \
-                                        \
-template <>                             \
-struct CommandSuit<NAME##_tag> {        \
-    enum class type : uint32_t {        \
-        __VA_ARGS__                     \
-    };                                  \
-};                                      \
-                                        \
 } // namespace packet_forge

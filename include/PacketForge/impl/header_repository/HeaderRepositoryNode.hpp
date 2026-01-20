@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CommandType.hpp"
+#include "../detail/CommandType.hpp"
 
 #include <memory>
 #include <optional>

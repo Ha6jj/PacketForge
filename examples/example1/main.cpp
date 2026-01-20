@@ -26,7 +26,7 @@ int main()
 
     if (packetResult.command == packet_forge::CommandType<packet_forge::ComplexSuit_tag>::ComplexCommand)
     {
-        restored_cmd = static_cast<packet_forge::CommandDeserializer<ComplexCommandArgs>&>(*packetResult.deserializer.get()).getArgs();
+        restored_cmd = static_cast<packet_forge::PacketDeserializer<ComplexCommandArgs>&>(*packetResult.deserializer.get()).getArgs();
         
         std::cout << restored_cmd.note.note << std::endl;
     }

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CommandType.hpp"
-#include "VectorView.hpp"
+#include "../detail/CommandType.hpp"
+#include "../detail/vector_view/VectorView.hpp"
 
 #include <vector>
 #include <unordered_map>

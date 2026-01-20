@@ -1,8 +1,6 @@
 #pragma once
 
-#include "../SerializerTraits.hpp"
-
-#include <stdexcept>
+#include "../SerializerKit.hpp"
 
 namespace packet_forge {
 
@@ -43,42 +41,42 @@ struct Serializer<uint32_t>
 template <>
 struct Deserializer<uint8_t>
 {
-    static DeserializeResult deserialize(uint8_t& value, VectorView<const uint8_t> packet, size_t& offset)
+    static DeserializationResult deserialize(uint8_t& value, VectorView<const uint8_t> packet, size_t& offset)
     {
-        if (offset + 1 > packet.size()) return DeserializeResult::OutOfRange;
+        if (offset + 1 > packet.size()) return DeserializationResult::OutOfRange;
 
         value = packet[offset++];
-        return DeserializeResult::DeserializeSuccess;
+        return DeserializationResult::Success;
     }
 };
 
 template <>
 struct Deserializer<uint16_t>
 {
-    static DeserializeResult deserialize(uint16_t& value, VectorView<const uint8_t> packet, size_t& offset)
+    static DeserializationResult deserialize(uint16_t& value, VectorView<const uint8_t> packet, size_t& offset)
     {
-        if (offset + 2 > packet.size()) return DeserializeResult::OutOfRange;
+        if (offset + 2 > packet.size()) return DeserializationResult::OutOfRange;
 
         value = static_cast<uint16_t>(packet[offset]) 
                 | (static_cast<uint16_t>(packet[offset + 1]) << 8);
         offset += 2;
-        return DeserializeResult::DeserializeSuccess;
+        return DeserializationResult::Success;
     }
 };
 
 template <>
 struct Deserializer<uint32_t>
 {
-    static DeserializeResult deserialize(uint32_t& value, VectorView<const uint8_t> packet, size_t& offset)
+    static DeserializationResult deserialize(uint32_t& value, VectorView<const uint8_t> packet, size_t& offset)
     {
-        if (offset + 4 > packet.size()) return DeserializeResult::OutOfRange;
+        if (offset + 4 > packet.size()) return DeserializationResult::OutOfRange;
 
         value = 0;
         for (int i = 0; i < 4; ++i)
         {
             value |= static_cast<uint32_t>(packet[offset++]) << (i * 8);
         }
-        return DeserializeResult::DeserializeSuccess;
+        return DeserializationResult::Success;
     }
 };
 

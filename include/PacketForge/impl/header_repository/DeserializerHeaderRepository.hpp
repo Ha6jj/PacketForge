@@ -1,9 +1,10 @@
 #pragma once
 
+#include "HeaderRepositoryNode.hpp"
+#include "../detail/vector_view/VectorView.hpp"
+
 #include <vector>
 #include <stdexcept>
-#include "HeaderRepositoryNode.hpp"
-#include "VectorView.hpp"
 
 namespace packet_forge {
 

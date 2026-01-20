@@ -1,10 +1,9 @@
 #pragma once
 
 #include "UserCommandType.hpp"
-#include "PacketForge/handlers/IntHandlers.hpp"
-#include "PacketForge/handlers/StringHandlers.hpp"
-
-#include <stdexcept>
+#include "PacketForge/macros/PacketStructure.hpp"
+#include "PacketForge/serializers/IntSerializers.hpp"
+#include "PacketForge/serializers/StringSerializers.hpp"
 
 struct Position
 {
@@ -25,13 +24,13 @@ struct packet_forge::Serializer<Position>
 template <>
 struct packet_forge::Deserializer<Position>
 {
-    static DeserializeResult deserialize(Position& value, VectorView<const uint8_t> packet, size_t& offset)
+    static DeserializationResult deserialize(Position& value, VectorView<const uint8_t> packet, size_t& offset)
     {
         if (auto res = Deserializer<uint32_t>::deserialize(value.x, packet, offset);
-            res != DeserializeResult::DeserializeSuccess) return res;
+            res != DeserializationResult::Success) return res;
         if (auto res = Deserializer<uint32_t>::deserialize(value.y, packet, offset);
-            res != DeserializeResult::DeserializeSuccess) return res;
-        return DeserializeResult::DeserializeSuccess;
+            res != DeserializationResult::Success) return res;
+        return DeserializationResult::Success;
         // return Deserializer<uint32_t>::deserialize(value.x, packet, offset);
     }
 };
@@ -55,13 +54,13 @@ struct packet_forge::Serializer<SomeNote>
 template <>
 struct packet_forge::Deserializer<SomeNote>
 {
-    static DeserializeResult deserialize(SomeNote& value, VectorView<const uint8_t> packet, size_t& offset)
+    static DeserializationResult deserialize(SomeNote& value, VectorView<const uint8_t> packet, size_t& offset)
     {
         if (auto res = Deserializer<uint8_t>::deserialize(value.system_flags, packet, offset);
-            res != DeserializeResult::DeserializeSuccess) return res;
+            res != DeserializationResult::Success) return res;
         if (auto res = Deserializer<std::string>::deserialize(value.note, packet, offset);
-            res != DeserializeResult::DeserializeSuccess) return res;
-        return DeserializeResult::DeserializeSuccess;
+            res != DeserializationResult::Success) return res;
+        return DeserializationResult::Success;
     }
 };
 
@@ -84,13 +83,13 @@ struct packet_forge::Serializer<Entity>
 template <>
 struct packet_forge::Deserializer<Entity>
 {
-    static DeserializeResult deserialize(Entity& value, VectorView<const uint8_t> packet, size_t& offset)
+    static DeserializationResult deserialize(Entity& value, VectorView<const uint8_t> packet, size_t& offset)
     {
         if (auto res = Deserializer<Position>::deserialize(value.pos, packet, offset);
-            res != DeserializeResult::DeserializeSuccess) return res;
+            res != DeserializationResult::Success) return res;
         if (auto res = Deserializer<std::string>::deserialize(value.name, packet, offset);
-            res != DeserializeResult::DeserializeSuccess) return res;
-        return DeserializeResult::DeserializeSuccess;
+            res != DeserializationResult::Success) return res;
+        return DeserializationResult::Success;
     }
 };
 
