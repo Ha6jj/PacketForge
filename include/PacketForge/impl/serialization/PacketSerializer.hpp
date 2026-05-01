@@ -16,7 +16,7 @@ public:
 
     void serialize(std::vector<uint8_t>& packet) const override
     {
-        Serializer<T>::serialize(args_, packet);
+        Serializer<std::decay_t<T>>::serialize(args_, packet);
     }
 
 private:

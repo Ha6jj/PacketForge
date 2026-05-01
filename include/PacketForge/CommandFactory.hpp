@@ -5,6 +5,8 @@
 #include "impl/deserialization/PacketDescriptor.hpp"
 #include "impl/deserialization/PacketDeserializer.hpp"
 #include "impl/header_repository/HeaderRepository.hpp"
+#include "SharedBufferPool.hpp"
+#include "config.hpp"
 
 #include <functional>
 
@@ -14,7 +16,23 @@ template <typename Tag>
 class CommandFactory
 {
     using SuitType = CommandType<Tag>;
+    static constexpr bool UseBufferPool = CommandSuit<Tag>::use_buffer_pool;
+
+    using BufferPoolType = std::conditional_t<UseBufferPool, 
+                                                std::shared_ptr<SharedBufferPool>, 
+                                                EmptyBufferPool>;
+
 public:
+    CommandFactory() {
+        if constexpr (UseBufferPool) {
+            buffer_pool_ = std::make_shared<SharedBufferPool>(DEFAULT_BUFFER_POOL_SIZE);
+        }
+    }
+
+    // Argument will be used only if use_buffer_pool enabled in Tag
+    explicit CommandFactory(std::shared_ptr<SharedBufferPool> buffer_pool)
+        : buffer_pool_(buffer_pool) {}
+
     template <typename ArgStruct>
     void registerCommand(SuitType cmd, const std::vector<uint8_t>& header)
     {
@@ -29,9 +47,9 @@ public:
     Packet<Tag> create(SuitType cmd, ArgStruct&& args) const
     {
         return Packet<Tag>(
-            cmd,
             std::make_unique<PacketSerializer<ArgStruct>>(std::forward<ArgStruct>(args)),
-            headers.getHeader(cmd)
+            headers.getHeader(cmd),
+            buffer_pool_
         );
     }
 
@@ -79,6 +97,8 @@ public:
 private:
     HeaderRepository<Tag> headers;
     std::unordered_map<uint32_t, std::function<std::unique_ptr<IPacketDeserializer>()>> deserializers_;
+
+    BufferPoolType buffer_pool_;
 };
 
 } // namespace packet_forge

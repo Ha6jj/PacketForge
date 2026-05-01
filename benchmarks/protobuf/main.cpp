@@ -62,11 +62,11 @@ private:
 };
 
 int main(int argc, char** argv) {
+    benchmark::Initialize(&argc, argv);
+
     BenchmarkRunner<ProtobufSerializer>::RegisterBenchmarks();
     
-    benchmark::Initialize(&argc, argv);
-    
-    CsvReporter reporter("protobuf_benchmark_results.csv");
+    CsvReporter reporter("bprotobuf_benchmark_results.csv");
     benchmark::RunSpecifiedBenchmarks(&reporter);
     
     return 0;

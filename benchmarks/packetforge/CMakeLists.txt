@@ -1,6 +1,14 @@
-add_library(PacketForge INTERFACE)
-target_include_directories(PacketForge INTERFACE
-    ${CMAKE_SOURCE_DIR}/include
+# benchmarks/packetforge
+
+add_executable(packetforge_benchmark main.cpp)
+target_link_libraries(packetforge_benchmark PRIVATE
+    benchmark::benchmark
+    BenchmarkUtils
+    PacketForge
 )
 
-# !!! Not working - Just plug
+target_compile_options(packetforge_benchmark PRIVATE
+    -O3
+    -march=native
+    -flto
+)
