@@ -1,12 +1,17 @@
 #pragma once
 
-#include "../impl/detail/CommandType.hpp"
+#include <PacketForge/impl/detail/CommandType.hpp>
 
 #include <cstdint>
+
+namespace packet_forge {
 
 struct DefaultConfig {
     static constexpr bool use_buffer_pool = false;
 };
+
+} // namespace packet_forge
+
 
 #define DEFINE_COMMAND_SUIT(NAME, CFG, ...)                         \
                                                                     \

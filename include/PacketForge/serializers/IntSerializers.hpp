@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../SerializerKit.hpp"
+#include <PacketForge/SerializerKit.hpp>
 #include <cstring>
 
 namespace packet_forge {
@@ -57,6 +57,22 @@ struct Serializer<bool>
     static void serialize(bool value, std::vector<uint8_t>& packet)
     {
         Serializer<uint8_t>::serialize(value ? 1 : 0, packet);
+    }
+};
+
+template <>
+struct Serializer<float>
+{
+    static void serialize(float value, std::vector<uint8_t>& packet)
+    {
+        static_assert(sizeof(float) == sizeof(uint32_t), "float must be 32-bit IEEE 754");
+        uint32_t raw;
+        std::memcpy(&raw, &value, sizeof(float));
+        for (int i = 0; i < 4; ++i)
+        {
+            packet.push_back(static_cast<uint8_t>(raw & 0xFF));
+            raw >>= 8;
+        }
     }
 };
 
@@ -195,6 +211,22 @@ struct Deserializer<bool>
         if (auto res = Deserializer<uint8_t>::deserialize(raw, packet, offset); res != DeserializationResult::Success)
             return res;
         value = (raw != 0);
+        return DeserializationResult::Success;
+    }
+};
+
+template <>
+struct Deserializer<float> {
+    static DeserializationResult deserialize(float& value, VectorView<const uint8_t> packet, size_t& offset)
+    {
+        if (offset + 4 > packet.size()) return DeserializationResult::OutOfRange;
+        uint32_t raw = 0;
+        for (int i = 0; i < 4; ++i)
+        {
+            raw |= static_cast<uint32_t>(packet[offset++]) << (i * 8);
+        }
+
+        std::memcpy(&value, &raw, sizeof(float));
         return DeserializationResult::Success;
     }
 };

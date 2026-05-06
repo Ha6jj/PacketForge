@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+# benchmarks/protobuf
 
 find_package(Protobuf REQUIRED)
 

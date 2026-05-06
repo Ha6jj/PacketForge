@@ -1,7 +1,7 @@
 #pragma once
 
-#include "DeserializationResult.hpp"
-#include "../detail/vector_view/VectorView.hpp"
+#include <PacketForge/impl/deserialization/DeserializationResult.hpp>
+#include <PacketForge/impl/detail/vector_view/VectorView.hpp>
 
 #include <cstddef>
 #include <cstdint>

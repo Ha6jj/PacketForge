@@ -48,12 +48,10 @@ public:
     constexpr VectorView(Container& cont) noexcept
         : VectorView(cont.data(), cont.size()) {}
 
-    template <typename Container,
-              typename = decltype(std::declval<Container>().data()),
-              typename = decltype(std::declval<Container>().size())>
-    constexpr VectorView(const Container& cont) noexcept
-        : VectorView(cont.data(), cont.size()) {}
-
+    template <typename CharType, typename Traits, typename Allocator,
+              std::enable_if_t<sizeof(CharType) == 1, int> = 0>
+    constexpr VectorView(const std::basic_string<CharType, Traits, Allocator>& str) noexcept
+        : VectorView(reinterpret_cast<const uint8_t*>(str.data()), str.size()) {}
 
     constexpr size_type size() const noexcept { return size_; }
     constexpr bool empty() const noexcept { return size_ == 0; }

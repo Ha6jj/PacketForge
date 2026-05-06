@@ -1,0 +1,54 @@
+namespace benchmark_fb;
+
+table KeyValueDouble {
+  key: string;
+  value: double;
+}
+
+table KeyValueString {
+  key: string;
+  value: string;
+}
+
+table SystemMetrics {
+  cpu_percent: double;
+  memory_percent: double;
+  disk_io_mbps: double;
+  network_rx_mbps: double;
+  network_tx_mbps: double;
+  custom_metrics: [KeyValueDouble];
+  epoch_seconds: long;
+  hostname: string;
+}
+
+table NetworkPacket {
+  sequence_number: uint;
+  src_ip: string;
+  dst_ip: string;
+  src_port: ushort;
+  dst_port: ushort;
+  payload: [ubyte];
+  is_encrypted: bool;
+  simulated_latency_ms: double;
+}
+
+table StrangeBenchmarkData {
+  values: [double];
+  metadata: [KeyValueString];
+  flag: bool;
+  timestamp: long;
+  blob: [ubyte];
+}
+
+table TimeSeriesData {
+  timestamps_ms: [long];
+  measurements: [float];
+  sensor_id: string;
+  sample_rate_hz: double;
+  is_calibrated: bool;
+}
+
+root_type SystemMetrics;
+root_type NetworkPacket;
+root_type StrangeBenchmarkData;
+root_type TimeSeriesData;

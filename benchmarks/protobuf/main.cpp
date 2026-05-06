@@ -1,72 +1,50 @@
-#include "BenchmarkUtils/ISerializer.hpp"
+#include "ProtobufSerializer.hpp"
 #include "BenchmarkUtils/BenchmarkRunner.hpp"
 #include "BenchmarkUtils/CsvReporter.hpp"
-#include "benchmark.pb.h"
+#include "benchmark.pb.h" 
+#include "generators.hpp"
+#include <benchmark/benchmark.h>
 
-class ProtobufSerializer : public ISerializer {
-public:
-    std::string GetName() const override { return "protobuf"; }
-    
-    std::string Serialize(const BenchmarkData& data) override {
-        BenchmarkPayload payload;
-        FillPayload(data, payload);
-        
-        std::string output;
-        payload.SerializeToString(&output);
-        return output;
-    }
-    
-    BenchmarkData Deserialize(const std::string& serialized) override {
-        BenchmarkPayload payload;
-        payload.ParseFromString(serialized);
-        
-        BenchmarkData data;
-        data.values.reserve(payload.values_size());
-        for (double value : payload.values()) {
-            data.values.push_back(value);
-        }
-        
-        for (const auto& kv : payload.metadata()) {
-            data.metadata[kv.first] = kv.second;
-        }
-        
-        data.flag = payload.flag();
-        data.timestamp = payload.timestamp();
-        data.blob = payload.blob();
-        
-        return data;
-    }
-    
-    size_t GetSerializedSize(const BenchmarkData& data) override {
-        BenchmarkPayload payload;
-        FillPayload(data, payload);
-        return payload.ByteSizeLong();
-    }
-
-private:
-    void FillPayload(const BenchmarkData& data, BenchmarkPayload& payload) {
-        payload.mutable_values()->Reserve(data.values.size());
-        for (double value : data.values) {
-            payload.add_values(value);
-        }
-        
-        auto* proto_metadata = payload.mutable_metadata();
-        for (const auto& kv : data.metadata) {
-            (*proto_metadata)[kv.first] = kv.second;
-        }
-        
-        payload.set_flag(data.flag);
-        payload.set_timestamp(data.timestamp);
-        payload.set_blob(data.blob);
-    }
-};
+constexpr char protobuf_name[] = "protobuf";
+constexpr char metrics_name[] = "metrics";
+constexpr char network_name[] = "network";
+constexpr char strange_name[] = "strange";
+constexpr char time_series_name[] = "timeseries";
 
 int main(int argc, char** argv) {
     benchmark::Initialize(&argc, argv);
-
-    BenchmarkRunner<ProtobufSerializer>::RegisterBenchmarks();
     
-    CsvReporter reporter("bprotobuf_benchmark_results.csv");
+    const std::vector<std::pair<size_t, size_t>> args = {
+        {100,    1024},
+        {10000,  4096},
+        {100000, 16384}
+    };
+
+    BenchmarkRunner<
+        ProtobufSerializer<benchmark_proto::SystemMetrics, metrics_name>,
+        benchmark_proto::SystemMetrics,
+        benchmark_generators::MetricsGenerator
+    >::Register(protobuf_name, args);
+
+    BenchmarkRunner<
+        ProtobufSerializer<benchmark_proto::NetworkPacket, network_name>,
+        benchmark_proto::NetworkPacket,
+        benchmark_generators::NetworkPacketGenerator
+    >::Register(protobuf_name, args);
+
+    BenchmarkRunner<
+        ProtobufSerializer<benchmark_proto::StrangeBenchmarkData, strange_name>,
+        benchmark_proto::StrangeBenchmarkData,
+        benchmark_generators::StrangeDataGenerator
+    >::Register(protobuf_name, args);
+
+    BenchmarkRunner<
+        ProtobufSerializer<benchmark_proto::TimeSeriesData, time_series_name>,
+        benchmark_proto::TimeSeriesData,
+        benchmark_generators::TimeSeriesGenerator
+    >::Register(protobuf_name, args);
+
+    CsvReporter reporter("protobuf_benchmark_results.csv");
     benchmark::RunSpecifiedBenchmarks(&reporter);
     
     return 0;

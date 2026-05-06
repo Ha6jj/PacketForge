@@ -1,9 +1,9 @@
 #pragma once
 
-#include "IPacketSerializer.hpp"
-#include "../detail/CommandType.hpp"
-#include "../detail/vector_view/VectorView.hpp"
-#include "../../SharedBufferPool.hpp"
+#include <PacketForge/impl/serialization/IPacketSerializer.hpp>
+#include <PacketForge/impl/detail/CommandType.hpp>
+#include <PacketForge/impl/detail/vector_view/VectorView.hpp>
+#include <PacketForge/SharedBufferPool.hpp>
 
 #include <memory>
 
@@ -48,7 +48,8 @@ public:
         }
         else
         {
-            std::vector<uint8_t> packet(header_.size() + 1024);
+            std::vector<uint8_t> packet;
+            packet.reserve(header_.size() + 1024);
             packet.insert(packet.end(), header_.begin(), header_.end());
             if (serializer_) serializer_->serialize(packet);
             return packet;

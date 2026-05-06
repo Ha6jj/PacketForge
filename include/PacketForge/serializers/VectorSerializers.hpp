@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../SerializerKit.hpp"
-#include "IntSerializers.hpp"
+#include <PacketForge/serializers/IntSerializers.hpp>
 
 #include <vector>
 

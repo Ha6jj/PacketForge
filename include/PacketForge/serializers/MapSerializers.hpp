@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IntSerializers.hpp"
+#include <PacketForge/serializers/IntSerializers.hpp>
 
 #include <map>
 

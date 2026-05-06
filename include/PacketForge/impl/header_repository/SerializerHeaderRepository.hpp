@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../detail/CommandType.hpp"
-#include "../detail/vector_view/VectorView.hpp"
+#include <PacketForge/impl/detail/CommandType.hpp>
+#include <PacketForge/impl/detail/vector_view/VectorView.hpp>
 
 #include <vector>
 #include <unordered_map>

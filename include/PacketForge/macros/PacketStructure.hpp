@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../SerializerKit.hpp"
+#include <PacketForge/SerializerKit.hpp>
 
 #include <type_traits>
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "impl/MPMCQueue.h"
-#include "impl/detail/Buffer.hpp"
+#include <PacketForge/impl/detail/Buffer.hpp>
 
 #include <vector>
 #include <atomic>

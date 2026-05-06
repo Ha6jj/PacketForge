@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Deserializer.hpp"
-#include "IPacketDeserializer.hpp"
-#include "DeserializationResult.hpp"
-#include "../detail/vector_view/VectorView.hpp"
+#include <PacketForge/impl/deserialization/Deserializer.hpp>
+#include <PacketForge/impl/deserialization/IPacketDeserializer.hpp>
+#include <PacketForge/impl/deserialization/DeserializationResult.hpp>
+#include <PacketForge/impl/detail/vector_view/VectorView.hpp>
 
 namespace packet_forge {
 

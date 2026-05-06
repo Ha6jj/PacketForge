@@ -1,7 +1,7 @@
 #pragma once
 
-#include "DeserializerHeaderRepository.hpp"
-#include "SerializerHeaderRepository.hpp"
+#include <PacketForge/impl/header_repository/DeserializerHeaderRepository.hpp>
+#include <PacketForge/impl/header_repository/SerializerHeaderRepository.hpp>
 
 #include <vector>
 
@@ -36,6 +36,11 @@ public:
     SuitType getCommand(VectorView<const uint8_t> packet) const
     {
         return deserializer_header_repository.getCommand(packet);
+    }
+
+    std::optional<SuitType> tryGetCommand(VectorView<const uint8_t> packet) const noexcept
+    {
+        return deserializer_header_repository.tryGetCommand(packet);
     }
 
 private:

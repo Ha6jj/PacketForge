@@ -1,9 +1,41 @@
 syntax = "proto3";
 
-message BenchmarkPayload {
-  repeated double values = 1;
+package benchmark_proto;
+
+message SystemMetrics {
+  double cpu_percent = 1;
+  double memory_percent = 2;
+  double disk_io_mbps = 3;
+  double network_rx_mbps = 4;
+  double network_tx_mbps = 5;
+  map<string, double> custom_metrics = 6;
+  int64 epoch_seconds = 7;
+  string hostname = 8;
+}
+
+message NetworkPacket {
+  uint32 sequence_number = 1;
+  string src_ip = 2;
+  string dst_ip = 3;
+  uint32 src_port = 4;          
+  uint32 dst_port = 5;            
+  bytes payload = 6;             
+  bool is_encrypted = 7;
+  double simulated_latency_ms = 8;
+}
+
+message StrangeBenchmarkData {
+  repeated double values = 1;  
   map<string, string> metadata = 2;
   bool flag = 3;
   int64 timestamp = 4;
-  bytes blob = 5;
+  string blob = 5;
+}
+
+message TimeSeriesData {
+  repeated int64 timestamps_ms = 1;
+  repeated float measurements = 2;
+  string sensor_id = 3;
+  double sample_rate_hz = 4;
+  bool is_calibrated = 5;
 }

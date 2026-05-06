@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VectorView.hpp"
+#include <PacketForge/impl/detail/vector_view/VectorView.hpp>
 #include <array>
 
 namespace packet_forge {

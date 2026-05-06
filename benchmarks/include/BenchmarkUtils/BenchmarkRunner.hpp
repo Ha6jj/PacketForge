@@ -1,74 +1,77 @@
 #pragma once
 
-#include "core/DataGenerator.hpp"
-
 #include <benchmark/benchmark.h>
 
-template <typename Serializer>
+#include <string>
+#include <vector>
+
+template <typename Serializer, typename DataType, typename Generator>
 class BenchmarkRunner {
 public:
-    static void RegisterBenchmarks() {
-        benchmark::RegisterBenchmark(
-            (Serializer().GetName() + "_serialize").data(),
-            &BenchmarkRunner<Serializer>::RunSerializeBenchmark
-        )
-        ->Args({100, 1024})
-        ->Args({10000, 4096})
-        ->Args({100000, 16384})
-        ->UseRealTime()
-        ->Unit(benchmark::kMicrosecond);
-        
-        benchmark::RegisterBenchmark(
-            (Serializer().GetName() + "_deserialize").data(),
-            &BenchmarkRunner<Serializer>::RunDeserializeBenchmark
-        )
-        ->Args({100, 1024})
-        ->Args({10000, 4096})
-        ->Args({100000, 16384})
-        ->UseRealTime()
-        ->Unit(benchmark::kMicrosecond);
+    static void Register(const std::string& base_name, 
+                         const std::vector<std::pair<size_t, size_t>>& args) {
+        std::string label = Serializer{}.GetName();
+
+        auto* ser_bench = benchmark::RegisterBenchmark(
+            (base_name + "_" + label + "_serialize").data(),
+            &BenchmarkRunner::RunSerializeBenchmark
+        );
+        auto* des_bench = benchmark::RegisterBenchmark(
+            (base_name + "_" + label + "_deserialize").data(),
+            &BenchmarkRunner::RunDeserializeBenchmark
+        );
+
+        for (const auto& [num, blob] : args) {
+            ser_bench->Args({static_cast<int64_t>(num), static_cast<int64_t>(blob)});
+            des_bench->Args({static_cast<int64_t>(num), static_cast<int64_t>(blob)});
+        }
+
+        ser_bench->UseRealTime()->Unit(benchmark::kMicrosecond);
+        des_bench->UseRealTime()->Unit(benchmark::kMicrosecond);
     }
 
 private:
     static void RunSerializeBenchmark(benchmark::State& state) {
-        RunSerialize(state, Serializer());
+        Serializer serializer;
+        RunSerialize(state, serializer);
     }
 
     static void RunDeserializeBenchmark(benchmark::State& state) {
-        RunDeserialize(state, Serializer());
+        Serializer serializer;
+        RunDeserialize(state, serializer);
     }
 
-    static void RunSerialize(benchmark::State& state, Serializer serializer) {
-        const size_t num_values = state.range(0);
-        const size_t blob_size = state.range(1);
-        
-        auto data = DataGenerator::Generate(num_values, blob_size);
+    static void RunSerialize(benchmark::State& state, Serializer& serializer) {
+        const size_t first = static_cast<size_t>(state.range(0));
+        const size_t second  = static_cast<size_t>(state.range(1));
+
+        DataType data = Generator::Generate(first, second);
         const size_t serialized_size = serializer.GetSerializedSize(data);
-        
+
         for (auto _ : state) {
-            std::string output;
-            benchmark::DoNotOptimize(output = serializer.Serialize(data));
+            auto output = serializer.Serialize(data);
+            benchmark::DoNotOptimize(output);
             benchmark::ClobberMemory();
         }
-        
+
         state.SetBytesProcessed(state.iterations() * serialized_size);
         state.SetItemsProcessed(state.iterations());
         state.counters["payload_size"] = static_cast<double>(serialized_size);
     }
 
-    static void RunDeserialize(benchmark::State& state, Serializer serializer) {
-        const size_t num_values = state.range(0);
-        const size_t blob_size = state.range(1);
-        
-        auto data = DataGenerator::Generate(num_values, blob_size);
-        std::string serialized = serializer.Serialize(data);
-        
+    static void RunDeserialize(benchmark::State& state, Serializer& serializer) {
+        const size_t first = static_cast<size_t>(state.range(0));
+        const size_t second  = static_cast<size_t>(state.range(1));
+
+        DataType data = Generator::Generate(first, second);
+        auto serialized = serializer.Serialize(data);
+
         for (auto _ : state) {
-            BenchmarkData result;
-            benchmark::DoNotOptimize(result = serializer.Deserialize(serialized));
+            DataType result = serializer.Deserialize(serialized);
+            benchmark::DoNotOptimize(result);
             benchmark::ClobberMemory();
         }
-        
+
         state.SetBytesProcessed(state.iterations() * serialized.size());
         state.SetItemsProcessed(state.iterations());
         state.counters["payload_size"] = static_cast<double>(serialized.size());

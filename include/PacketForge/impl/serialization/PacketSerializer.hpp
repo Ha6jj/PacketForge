@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Serializer.hpp"
-#include "IPacketSerializer.hpp"
+#include <PacketForge/impl/serialization/Serializer.hpp>
+#include <PacketForge/impl/serialization/IPacketSerializer.hpp>
 
 #include <memory>
 

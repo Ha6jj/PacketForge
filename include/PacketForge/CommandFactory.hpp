@@ -1,12 +1,12 @@
 #pragma once
 
-#include "impl/serialization/Packet.hpp"
-#include "impl/serialization/PacketSerializer.hpp"
-#include "impl/deserialization/PacketDescriptor.hpp"
-#include "impl/deserialization/PacketDeserializer.hpp"
-#include "impl/header_repository/HeaderRepository.hpp"
-#include "SharedBufferPool.hpp"
-#include "config.hpp"
+#include <PacketForge/impl/serialization/Packet.hpp>
+#include <PacketForge/impl/serialization/PacketSerializer.hpp>
+#include <PacketForge/impl/deserialization/PacketDescriptor.hpp>
+#include <PacketForge/impl/deserialization/PacketDeserializer.hpp>
+#include <PacketForge/impl/header_repository/HeaderRepository.hpp>
+#include <PacketForge/SharedBufferPool.hpp>
+#include <PacketForge/config.hpp>
 
 #include <functional>
 
@@ -78,7 +78,7 @@ public:
     {
         std::vector<PacketDescriptor<Tag>> result;
 
-        while (!stream_view.empty())
+        while (peekCommand(stream_view).has_value())
         {
             auto packetOpt = deserializePacket(stream_view);
             
@@ -93,6 +93,12 @@ public:
         return result;
     }
 
+    std::optional<SuitType> peekCommand(VectorView<const uint8_t> packet) const noexcept
+    {
+        if (packet.empty()) return std::nullopt;
+        return headers.tryGetCommand(packet);
+    }
+
 
 private:
     HeaderRepository<Tag> headers;
@@ -102,6 +108,3 @@ private:
 };
 
 } // namespace packet_forge
-
-#define REGISTER_COMMAND(factory, cmd, arg_struct, header)                  \
-    factory.template registerCommand<arg_struct>(cmd, header);

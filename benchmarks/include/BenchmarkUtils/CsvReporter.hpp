@@ -14,7 +14,7 @@ public:
             throw std::runtime_error("Failed to open CSV file: " + filename);
         }
         file_.precision(6);
-        file_ << "serializer,operation,"
+        file_ << "serializer,label,operation,trial,"
               << "iterations,avg_real_time_us,avg_cpu_time_us,"
               << "total_real_time_s,payload_size_bytes\n";
     }
@@ -34,8 +34,8 @@ public:
 
 private:
     void ProcessRun(const Run& run) {
-        std::string serializer, operation;
-        ParseBenchmarkName(run.benchmark_name(), serializer, operation);
+        std::string serializer, operation, trial, label;
+        ParseBenchmarkName(run.benchmark_name(), serializer, label, operation, trial);
 
         double payload_size = 0.0;
         auto counter_it = run.counters.find("payload_size");
@@ -47,7 +47,9 @@ private:
         double avg_cpu_time_us  = run.GetAdjustedCPUTime() * 1e6;
 
         file_ << serializer << "," 
+              << label << ","
               << operation << ","
+              << trial << ","
               << run.iterations << ","
               << avg_real_time_us << ","
               << avg_cpu_time_us << ","
@@ -55,33 +57,39 @@ private:
               << payload_size << "\n";
     }
 
-    void ParseBenchmarkName(const std::string& name, 
-                           std::string& serializer, 
-                           std::string& operation) {
-        std::string clean_name = name;
-        size_t time_pos = clean_name.find("/real_time");
-        if (time_pos != std::string::npos) {
-            clean_name.erase(time_pos);
-        }
-        
-        time_pos = clean_name.find("/cpu_time");
-        if (time_pos != std::string::npos) {
-            clean_name.erase(time_pos);
+   void ParseBenchmarkName(const std::string& name,
+                           std::string& serializer,
+                           std::string& label,
+                           std::string& operation,
+                           std::string& trial) {
+        std::string clean = name;
+
+        for (const char* suffix : {"/real_time", "/cpu_time"}) {
+            auto pos = clean.find(suffix);
+            if (pos != std::string::npos) clean.erase(pos);
         }
 
-        size_t args_pos = clean_name.find("/");
+        size_t args_pos = clean.find('/');
         if (args_pos != std::string::npos) {
-            clean_name.erase(args_pos);
+            trial = clean.substr(args_pos + 1);
+            clean.erase(args_pos);
+        } else {
+            trial = "no_args";
         }
 
-        size_t underscore_pos = clean_name.find_last_of('_');
-        if (underscore_pos == std::string::npos) {
-            serializer = clean_name;
-            operation = "unknown";
-        } else {
-            serializer = clean_name.substr(0, underscore_pos);
-            operation = clean_name.substr(underscore_pos + 1);
+        size_t last_ = clean.find_last_of('_');
+        if (last_ == std::string::npos) {
+            serializer = clean; label = "unknown"; operation = "unknown"; return;
         }
+        operation = clean.substr(last_ + 1);
+        clean.erase(last_);
+
+        size_t prev_ = clean.find_last_of('_');
+        if (prev_ == std::string::npos) {
+            serializer = clean; label = "unknown"; return;
+        }
+        label = clean.substr(prev_ + 1);
+        serializer = clean.substr(0, prev_);
     }
 
     std::ofstream file_;

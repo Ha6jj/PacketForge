@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../detail/CommandType.hpp"
-#include "IPacketDeserializer.hpp"
+#include <PacketForge/impl/detail/CommandType.hpp>
+#include <PacketForge/impl/deserialization/IPacketDeserializer.hpp>
 
 #include <memory>
 

@@ -2,6 +2,6 @@
 
 #include "PacketForge/macros/CommandSuit.hpp"
 
-DEFINE_COMMAND_SUIT(ComplexSuit, 
+DEFINE_DEFAULT_COMMAND_SUIT(ComplexSuit, 
     ComplexCommand
 )
