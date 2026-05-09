@@ -26,6 +26,12 @@ struct TestPayloadComplex {
 PACKET_STRUCTURE(TestPayloadComplex, &TestPayloadComplex::version, &TestPayloadComplex::length,
                  &TestPayloadComplex::flags, &TestPayloadComplex::timestamp)
 
+struct ShuffledFields {
+    uint8_t field1, field2;
+};
+
+PACKET_STRUCTURE(ShuffledFields, &ShuffledFields::field2, &ShuffledFields::field1)
+
 DEFINE_DEFAULT_COMMAND_SUIT(WithoutPool, WithoutPoolCommand)
 DEFINE_DEFAULT_COMMAND_SUIT(Stream, StreamCommand)
 DEFINE_DEFAULT_COMMAND_SUIT(Error, ErrorCommand)
@@ -217,6 +223,61 @@ TEST(CommandFactoryTest, EdgeCases_EmptyAndZeroSized) {
     ASSERT_FALSE(result.has_value());
 
     ASSERT_FALSE(factory.peekCommand(empty_view).has_value());
+}
+
+struct CustomSerialized {
+    uint16_t field;
+};
+
+template <>
+struct Serializer<CustomSerialized>
+{
+    static void serialize(const CustomSerialized& value, std::vector<uint8_t>& packet)
+    {
+        packet.push_back(1);
+    }
+};
+
+template <>
+struct Deserializer<CustomSerialized>
+{
+    static DeserializationResult deserialize(CustomSerialized& value, VectorView<const uint8_t> packet, size_t& offset)
+    {
+        offset += 1;
+        value.field = 2;
+        return DeserializationResult::Success;
+    }
+};
+
+TEST(CommandFactoryTest, CustomSerializer) {
+    CommandFactory<WithoutPool_tag> factory;
+    factory.registerCommand<CustomSerialized>(CommandType<WithoutPool_tag>::WithoutPoolCommand, {0x01});
+    
+    auto packet = factory.create(CommandType<WithoutPool_tag>::WithoutPoolCommand, CustomSerialized{7});
+    std::vector<uint8_t> expected = {0x01, 0x01};
+    ASSERT_EQ(packet.build(), expected);
+
+    std::vector<uint8_t> stream = {0x01, 0x09};
+    auto result = factory.deserializePacket(stream);
+    auto restored = extractPayload<CustomSerialized, WithoutPool_tag>(*result);
+
+    ASSERT_EQ(restored.field, 2);
+}
+
+TEST(CommandFactoryTest, ShuffleFields) {
+    CommandFactory<WithoutPool_tag> factory;
+    factory.registerCommand<ShuffledFields>(CommandType<WithoutPool_tag>::WithoutPoolCommand, {0x01});
+    
+    auto packet = factory.create(CommandType<WithoutPool_tag>::WithoutPoolCommand, ShuffledFields{1, 2});
+    std::vector<uint8_t> expected = {0x01, 0x02, 0x01};
+    ASSERT_EQ(packet.build(), expected);
+
+    std::vector<uint8_t> stream = {0x01, 0x03, 0x04};
+    auto result = factory.deserializePacket(stream);
+    auto restored = extractPayload<ShuffledFields, WithoutPool_tag>(*result);
+
+    ASSERT_EQ(restored.field1, 4);
+    ASSERT_EQ(restored.field2, 3);
 }
 
 } // namespace packet_forge
