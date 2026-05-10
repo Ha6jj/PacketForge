@@ -23,11 +23,11 @@ cd PacketForge
 * Требуется google-benchmark, protobuf (Опционально. Нужно для получения референсных значений).
 
 ```bash
-chmod +x run_benchmarks.sh
-./run_benchmarks.sh
+chmod +x scripts/run_benchmarks.sh
+./scripts/run_benchmarks.sh
 ```
 
-Результаты тестирования будут лежать в benchmark_results/
+Результаты тестирования будут лежать в build/benchmark_results/
 
 ### Если хотите самостоятельно собрать и запустить
 
@@ -62,8 +62,8 @@ cmake --build build
 ### Генерация отчета о покрытии тестами
 
 ```bash
-chmod +x generate_coverage.sh
-./generate_coverage.sh
+chmod +x scripts/generate_coverage.sh
+./scripts/generate_coverage.sh
 ```
 
 # Быстрый старт

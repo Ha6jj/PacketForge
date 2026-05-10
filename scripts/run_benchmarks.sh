@@ -1,9 +1,9 @@
 #!/usr/bin/bash
 set -euo pipefail
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="${PROJECT_ROOT}/build"
-RESULTS_BASE="${PROJECT_ROOT}/benchmark_results"
+RESULTS_BASE="${BUILD_DIR}/benchmark_results"
 TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 RUN_DIR="${RESULTS_BASE}/${TIMESTAMP}"
 

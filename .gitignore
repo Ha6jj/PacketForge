@@ -1,6 +1,4 @@
 build/
-bin/
-benchmark_results/
 *.exe
 *.out
 *.o
@@ -13,12 +11,6 @@ benchmark_results/
 *.ncb
 *.sln
 *.vcxproj*
-
-CMakeCache.txt
-CMakeFiles/
-cmake_install.cmake
-CTestTestfile.cmake
-Makefile
 
 *.log
 *.tmp

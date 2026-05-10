@@ -8,8 +8,9 @@ if ! command -v gcovr &> /dev/null; then
     export PATH="$HOME/.local/bin:$PATH"
 fi
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="${PROJECT_ROOT}/build"
+COVERAGE_DIR="${BUILD_DIR}/coverage"
 
 echo "Cleaning & Configuring..."
 rm -rf "${BUILD_DIR}"
@@ -21,11 +22,13 @@ cmake --build "${BUILD_DIR}" --parallel "$(nproc)"
 echo "Running Tests..."
 ctest --test-dir "${BUILD_DIR}" --output-on-failure
 
+mkdir "${COVERAGE_DIR}"
+
 echo "Report generation..."
 gcovr \
     --root "${PROJECT_ROOT}"    \
     --filter "include/PacketForge"         \
-    --html "${BUILD_DIR}/coverage_report.html"    \
+    --html "${COVERAGE_DIR}/coverage_report.html"    \
     --gcov-ignore-parse-errors=negative_hits.warn_once_per_file \
     --html-details              \
     --print-summary
