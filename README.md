@@ -46,7 +46,7 @@ cmake --build build
 ```bash
 cmake -B build -DBUILD_EXAMPLES=ON
 cmake --build build
-./build/examples/example1/example1
+./build/examples/simple/simple
 ```
 
 ## Сборка и запуск тестов

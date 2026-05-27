@@ -16,6 +16,15 @@ struct Serializer<uint8_t>
 };
 
 template <>
+struct Serializer<char>
+{
+    static void serialize(char value, std::vector<uint8_t>& packet)
+    {
+        packet.push_back(static_cast<uint8_t>(value));
+    }
+};
+
+template <>
 struct Serializer<uint16_t>
 {
     static void serialize(uint16_t value, std::vector<uint8_t>& packet)
@@ -152,6 +161,17 @@ struct Deserializer<uint8_t>
         if (offset + 1 > packet.size()) return DeserializationResult::OutOfRange;
 
         value = packet[offset++];
+        return DeserializationResult::Success;
+    }
+};
+
+template <>
+struct Deserializer<char>
+{
+    static DeserializationResult deserialize(char& value, VectorView<const uint8_t> packet, size_t& offset)
+    {
+        if (offset + 1 > packet.size()) return DeserializationResult::OutOfRange;
+        value = static_cast<char>(packet[offset++]);
         return DeserializationResult::Success;
     }
 };

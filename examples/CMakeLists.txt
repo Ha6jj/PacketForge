@@ -1,3 +1,4 @@
 # examples
 
-add_subdirectory(example1)
+add_subdirectory(simple)
+add_subdirectory(math_server)
